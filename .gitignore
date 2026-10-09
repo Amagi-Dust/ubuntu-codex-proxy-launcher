@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.env.*
+!.env.example
+/config.json
+/history.json
+/state.json
+/original.desktop
+*.log
+*.bak
+*~
+.idea/
