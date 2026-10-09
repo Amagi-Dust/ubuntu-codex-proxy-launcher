@@ -1,6 +1,6 @@
 > **测试提示：本程序尚未经过充分的多设备、多系统版本测试，目前仍为早期版本。仅在一台 Ubuntu 24.04.5 GNOME 设备上获得实际使用反馈，不能保证适用于所有 Ubuntu 版本、硬件、代理客户端或 Codex 安装方式。请先检测和预览，再应用配置。**
 
-# Ubuntu Codex 代理启动配置
+# Ubuntu Codex 代理启动配置（Ubuntu Codex Proxy Launcher）
 
 从 GNOME 手动系统代理读取地址，为 ChatGPT/Codex 安装用户级桌面启动器。之后点击原图标时重新检测代理，不再每次输入 `env ... chatgpt`。系统代理更新端口后，下次启动自动读取新端口。
 
@@ -212,3 +212,193 @@ git diff --check
 ```
 
 测试在临时目录进行，不改真实桌面设置。uv 环境无第三方 Python 依赖。
+
+---
+
+> **Testing notice: This is an early release and has not yet been tested across enough devices or operating-system versions. It has received real-world feedback from only one Ubuntu 24.04.5 GNOME device. Compatibility with every Ubuntu version, computer, proxy client, or Codex installation method is not guaranteed. Always run detection and preview before applying changes.**
+
+# Ubuntu Codex Proxy Launcher
+
+This tool reads the GNOME manual proxy configuration and installs a user-level launcher for ChatGPT/Codex. After installation, opening the original application icon detects the current system proxy at launch time, so users no longer need to run a long `env ... chatgpt` command. If the system proxy port changes, the next complete application restart reads the new port.
+
+## Why this project exists
+
+This project began with a ChatGPT/Codex startup and connectivity problem on Ubuntu. A proxy client was running, but the application did not work normally. Starting it from a terminal with explicit `HTTP_PROXY`, `HTTPS_PROXY`, and related environment variables allowed the user to start the application, sign in, and use Codex.
+
+That comparison supports the conclusion that the application needed an appropriate proxy environment at startup. It does not prove that this was the only cause of every observed failure. Desktop proxy settings, terminal environment variables, and TUN mode are separate mechanisms, and individual application components may use different networking behavior. Enabling a desktop proxy does not guarantee that every process inherits or uses it.
+
+Some cloud conversations also timed out intermittently during the original investigation. Their exact cause was not established. This project does not claim to fix every conversation-loading timeout, missing system library, application crash, account restriction, service outage, or incompatible installation package. It does not provide proxy subscriptions, nodes, or network services.
+
+## How it works
+
+The setup tool detects the proxy and application entry, backs up an existing user launcher, and creates a managed user-level launcher:
+
+```text
+Open the original application icon
+  → run the installed launcher.py
+  → read the current GNOME proxy (or use a fixed manual URL)
+  → check that the proxy TCP port is reachable
+  → set uppercase and lowercase proxy variables plus bypass rules
+  → execute the original application
+```
+
+The tool does not modify `/usr/bin`, `/usr/lib`, or the global system proxy, and applying a configuration does not require root access. It does not terminate an existing Codex session. After applying a new configuration or changing a port, completely quit the application and reopen it from the icon. Running `chatgpt` directly in a terminal bypasses this desktop launcher.
+
+On the currently tested device, launching from the icon worked after installation. It also continued to work after the GNOME proxy port changed from 7897 to 7890. This is single-device feedback, not cross-device certification or packet-level verification.
+
+## Supported environments
+
+Compatibility depends mainly on the operating system, desktop environment, and application installation method, not on the computer brand or GPU.
+
+| Environment | Current status |
+| --- | --- |
+| Ubuntu 24.04.5 with GNOME | Tested on one device with successful user feedback |
+| Ubuntu 22.04 with GNOME | Compatibility candidate; no real-device or Python 3.10 validation yet |
+| Other Ubuntu versions or GNOME Linux distributions | Not validated; no compatibility promise |
+| KDE, XFCE, and other non-GNOME desktops | Automatic system mode is unsupported; manual mode still needs validation |
+| Windows and macOS | Unsupported |
+| Clash, Clash Verge, Mihomo, and other proxy clients | Not tied to a brand; the client must expose a supported proxy and update GNOME settings, or the user must enter a URL manually |
+| Snap, Flatpak, or complex shell-based launchers | Unsupported in this release |
+
+The Python source requires Python 3.10 or newer. Development and current testing use Python 3.12. The ChatGPT/Codex application itself must also support the target device.
+
+## Requirements
+
+- Ubuntu with GNOME and Python 3.10 or newer.
+- `gsettings` and `desktop-file-validate` from `desktop-file-utils`.
+- Tkinter for the GUI.
+- Optional `notify-send` support for desktop launch-error notifications.
+- A regular native `.desktop` application entry.
+
+PAC, authenticated proxies, TUN-only configurations, Snap/Flatpak entries, and complex shell launch commands are not supported by the first release.
+
+## Installation and first run
+
+1. Install a ChatGPT/Codex build that runs on the target computer and provides a regular `.desktop` entry.
+2. Start the proxy client, enable the GNOME manual system proxy, and confirm its address and port.
+3. Download or clone this repository and install uv.
+4. Install the Ubuntu system dependencies and create the environment:
+
+```bash
+sudo apt install python3 python3-tk desktop-file-utils libglib2.0-bin libnotify-bin
+uv sync --locked
+uv run python -c "import tkinter; print(tkinter.TkVersion)"
+uv run python main.py
+```
+
+uv selects an interpreter satisfying Python 3.10 or newer. The Ubuntu system Python is recommended because it works with the distribution's `python3-tk` package. If uv selects a separately downloaded Python build, that interpreter must also include Tk support.
+
+## Recommended GUI workflow
+
+1. Keep **Follow GNOME system proxy** selected. This mode shows instructions instead of manual input fields.
+2. Select **Detect proxy** and confirm that the detected address matches the proxy client. A reachable TCP port does not prove that the proxy protocol or remote service works.
+3. Select **Preview configuration** and confirm the target desktop entry. Preview does not write launcher files.
+4. Select **Apply configuration** and confirm the operation. The tool creates a backup and user-level launcher.
+5. Select **Check status** and read the detailed output. A successful command only means that the check ran; the output may still say that no configuration is installed.
+6. Completely quit ChatGPT/Codex, reopen it from its original application icon, and test the required online functions.
+
+After a successful setup, the configuration tool does not need to run every day. In system mode, a complete application restart reads the current GNOME proxy again. The proxy client and GNOME settings must refer to the same active port.
+
+In **Manual fixed address** mode, enter a complete proxy URL such as `http://127.0.0.1:7897`. Leave the desktop-entry field empty for automatic discovery, or select a `.desktop` file. Manual mode stores a fixed address and must be reapplied if the port changes.
+
+The GUI provides proxy detection, preview, apply, status, restore, preference saving, and operation-history clearing. Saving preferences does not apply them to the application launcher. Applying or restoring requires an explicit confirmation.
+
+### VS Code and other IDEs
+
+Open the complete repository in VS Code, install the recommended Python and Python Debugger extensions, and press **F5** or **Ctrl+F5**. Select **启动 Codex 代理配置界面**. The included launch configuration uses `.venv/bin/python`.
+
+Other IDEs can run the root [main.py](main.py) with the project `.venv/bin/python` interpreter. On a new computer, run `uv sync --locked` before using the IDE launch configuration.
+
+### Command-line interface
+
+```bash
+# Read and check the current proxy without modifying files
+uv run python proxy_setup.py detect --check
+
+# Preview the desktop configuration
+uv run python proxy_setup.py install
+
+# Apply the configuration
+uv run python proxy_setup.py install --apply
+
+# Verify managed files
+uv run python proxy_setup.py status
+
+# Restore the launcher state from before installation
+uv run python proxy_setup.py restore
+
+# Select a desktop entry explicitly; this still previews by default
+uv run python proxy_setup.py install --desktop /usr/share/applications/chatgpt.desktop
+
+# Install a fixed proxy URL instead of following GNOME
+uv run python proxy_setup.py install --proxy http://127.0.0.1:7897
+```
+
+When using explicit options, pass them again to the final `install --apply` command. To change an installed mode or update the installed launcher code, restore first and then install again. A repeated identical installation is idempotent.
+
+The installed launcher uses `/usr/bin/python3`; it does not depend on the project's uv environment or the continued presence of the repository. The project is still required to run the restore command.
+
+## Detection behavior
+
+The source priority is:
+
+1. An explicitly supplied `--proxy` URL.
+2. The current GNOME manual proxy configuration.
+
+Existing proxy environment variables are reported without revealing their values, but they are not used as a fallback. This prevents a stale inherited port from silently overriding the selected source.
+
+HTTP, HTTPS-target, and SOCKS settings can differ. GNOME's HTTPS field describes the HTTP proxy used for HTTPS destinations; it does not mean that the proxy server itself uses TLS. SOCKS is exported as `socks5h`. Actual protocol compatibility still needs a real connection test.
+
+Before launching the application, the tool performs a limited TCP-port check. Failure stops the launch and does not silently fall back to a direct connection. The check does not validate the proxy protocol, exit node, account, or OpenAI service. GNOME bypass entries, bypass values from the original launcher, and inherited bypass entries are preserved, although CIDR and wildcard support depends on the application component.
+
+## Files and personal data
+
+Not every file is stored in the repository. Source code, documentation, examples, tests, and environment declarations belong to the project. Personal preferences, operation history, backups, and installed launcher files belong to the current user account.
+
+| Default location | Purpose | Commit to GitHub? |
+| --- | --- | --- |
+| Repository `config.example.json` | Public configuration-format example | Yes |
+| Repository `pyproject.toml` and `uv.lock` | Python requirement and locked uv environment | Yes |
+| Repository `.venv/` | Local virtual environment | No; ignored |
+| `~/.config/codex-proxy-setup/config.json` | GUI mode, manual URL, and desktop-entry preference | No |
+| `~/.config/codex-proxy-setup/history.json` | Most recent 100 operation records | No |
+| `~/.local/share/codex-proxy-setup/config.json` | Applied launcher mode and preserved bypass entries | No |
+| `~/.local/share/codex-proxy-setup/launcher.py` | Installed standalone launcher copy | No; its source remains in the repository |
+| `~/.local/share/codex-proxy-setup/state.json` | Managed targets and integrity hashes | No |
+| `~/.local/share/codex-proxy-setup/original.desktop` | Original user launcher backup, when one existed | No |
+| `~/.local/share/applications/<application>.desktop` | Active user-level application entry | No |
+
+`XDG_CONFIG_HOME` changes the GUI configuration root, while `XDG_DATA_HOME` changes the installed-launcher root. **Save settings** writes only the GUI `config.json`; **Apply configuration** writes launcher files; **Clear history** writes only `history.json`.
+
+Configuration and history files are written with mode 0600. Installation is idempotent. Restore verifies the generated files and backup before changing anything; if a managed file was edited after installation, restore refuses to overwrite it. A backup may contain private launcher settings and should not be shared.
+
+Restoring does not delete GUI preferences or history. Deleting the repository does not uninstall the launcher. Use **Restore original configuration** before deleting the project if the installed changes should be removed. On another device, copy or clone the repository and run detection again. Do not copy an old `state.json` containing paths and hashes from a different computer.
+
+## GitHub sharing and issue reports
+
+The repository should contain source code, tests, this README, project documentation, the changelog, example JSON, the uv lock file, and IDE settings. Do not upload real user configuration, history, launcher backups, or `.venv`. These files are outside the repository by default; check again before committing if they were copied into the project manually.
+
+When reporting a problem, include the Ubuntu version, desktop environment, Python version, application installation method, proxy mode, failed step, and sanitized error output. Never publish proxy credentials or a complete private operation log.
+
+This repository does not currently include an open-source license. Publishing it does not automatically grant unrestricted reuse or redistribution rights. The maintainer should choose a license before a formal public release.
+
+## Limitations
+
+- The proxy client must be running. Automatic mode requires an enabled GNOME manual proxy.
+- If a client changes its port without updating GNOME settings, the tool cannot discover the new value.
+- Existing application processes do not receive new environment variables. Completely quit before retesting.
+- Direct terminal launches do not use the managed desktop launcher.
+- Proxy environment variables may not affect every application component, and the tool cannot guarantee that cloud-conversation timeouts disappear.
+- Proxy authentication, automatic direct fallback, private client-configuration parsing, PAC, and TUN-only operation are unsupported.
+- Application upgrades that change the executable or desktop entry may require restore and reinstallation.
+- Complex customized desktop entries are rejected instead of being rewritten silently.
+
+## Development checks
+
+```bash
+uv run python -m unittest discover -s tests -v
+uv run python -m py_compile main.py gui.py proxy_setup.py
+git diff --check
+```
+
+Tests use temporary directories and do not modify the real desktop configuration. The uv environment has no third-party Python dependency.

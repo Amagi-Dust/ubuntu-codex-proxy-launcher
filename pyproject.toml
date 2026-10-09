@@ -1,5 +1,5 @@
 [project]
-name = "codex-proxy-setup"
+name = "ubuntu-codex-proxy-launcher"
 version = "0.1.0"
 description = "User-level GNOME proxy launcher configuration for ChatGPT/Codex"
 requires-python = ">=3.10"

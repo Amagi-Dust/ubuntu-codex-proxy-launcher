@@ -1,6 +1,8 @@
-# Ubuntu 代理与 Codex 启动配置工具
+# Ubuntu Codex Proxy Launcher
 
 ## 目标与状态
+
+英文项目名为 **Ubuntu Codex Proxy Launcher**，推荐 GitHub 仓库名为 `ubuntu-codex-proxy-launcher`。为兼容已经安装的版本，用户配置及数据目录继续使用内部标识 `codex-proxy-setup`。
 
 自动读取 Ubuntu 上 Clash/Mihomo 等客户端对应的代理信息，为 ChatGPT/Codex 生成持久的用户级启动配置。
 
