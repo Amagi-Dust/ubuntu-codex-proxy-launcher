@@ -95,7 +95,7 @@ def save_config(path, data):
 
 def command_for(action, config):
     args = [sys.executable, str(Path(__file__).with_name('proxy_setup.py'))]
-    args += {'检测代理': ['detect', '--check'], '预览配置': ['install'],
+    args += {'启用系统代理': ['enable-proxy'], '检测代理': ['detect', '--check'], '预览配置': ['install'],
              '应用配置': ['install', '--apply'], '检查状态': ['status'],
              '恢复原配置': ['restore']}[action]
     if action in ('检测代理', '预览配置', '应用配置'):
@@ -117,13 +117,13 @@ class App:
         self.proc = None
         self.output_file = None
         self.root.title('Codex 代理配置')
-        self.root.geometry('900x670')
+        self.root.geometry('900x720')
         self.root.minsize(760, 560)
         self.root.protocol('WM_DELETE_WINDOW', self.close)
         frame = ttk.Frame(root, padding=20)
         frame.pack(fill='both', expand=True)
         ttk.Label(frame, text='Codex 代理配置', font=('', 20, 'bold')).pack(anchor='w')
-        ttk.Label(frame, text='检测 → 预览 → 应用。应用后完全退出 Codex，再从原图标启动。').pack(anchor='w', pady=(5, 16))
+        ttk.Label(frame, text='启用系统代理 → 检测 → 预览 → 应用。应用后完全退出 Codex，再从原图标启动。').pack(anchor='w', pady=(5, 16))
         self.mode = tk.StringVar(value=self.data['mode'])
         self.proxy = tk.StringVar(value=self.data['proxy_url'])
         self.desktop = tk.StringVar(value=self.data['desktop_path'])
@@ -135,11 +135,12 @@ class App:
             radio.grid(row=0, column=column, sticky='w', pady=5)
             self.widgets.append(radio)
         self.system_steps = ttk.Label(form, text=(
-            '1. 启动 Clash 等代理客户端，并开启 GNOME 系统代理。\n'
+            '1. 先启动 Clash/Mihomo，再点击“启用系统代理”。\n'
             '2. 点击“检测代理”，再点击“预览配置”，在下方查看结果。\n'
             '3. 点击“应用配置”，然后“检查状态”。\n'
             '4. 完全退出 Codex，再从原图标启动。\n'
-            '无需填写地址或快捷方式；每次启动自动读取系统代理。'),
+            '按钮开启失败时：Ubuntu 设置 → 网络 → 网络代理 → 打开开关 → 选择 Manual，\n'
+            '填写代理客户端的 HTTP/HTTPS 地址和端口，然后从第 2 步继续。'),
             justify='left', wraplength=690)
         self.system_steps.grid(row=1, column=0, columnspan=3, sticky='ew', pady=8)
         self.manual_fields = ttk.Frame(form)
@@ -160,7 +161,7 @@ class App:
         form.columnconfigure(1, weight=1)
         buttons = ttk.Frame(frame)
         buttons.pack(fill='x', pady=14)
-        for action in ('检测代理', '预览配置', '应用配置', '检查状态', '恢复原配置'):
+        for action in ('启用系统代理', '检测代理', '预览配置', '应用配置', '检查状态', '恢复原配置'):
             button = ttk.Button(buttons, text=action, command=lambda a=action: self.run(a))
             button.pack(side='left', padx=(0, 6))
             self.widgets.append(button)

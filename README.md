@@ -2,7 +2,7 @@
 
 # Ubuntu Codex 代理启动配置（Ubuntu Codex Proxy Launcher）
 
-从 GNOME 手动系统代理读取地址，为 ChatGPT/Codex 安装用户级桌面启动器。之后点击原图标时重新检测代理，不再每次输入 `env ... chatgpt`。系统代理更新端口后，下次启动自动读取新端口。
+从 GNOME 手动系统代理读取地址，为 ChatGPT/Codex 安装用户级桌面启动器。界面可以校验 GNOME 中已保存的地址并将系统代理切换为 Manual。之后点击原图标时重新检测代理，不再每次输入 `env ... chatgpt`。系统代理更新端口后，下次启动自动读取新端口。
 
 ## 为什么编写这个项目
 
@@ -59,7 +59,7 @@ Python 源码声明要求 3.10+，实际开发测试使用 3.12；这不等于�
 ### 新用户准备
 
 1. 安装能够在本机运行的 ChatGPT/Codex，确认存在普通 `.desktop` 应用入口。
-2. 启动代理客户端，开启 GNOME 手动系统代理，并确认代理地址和端口有效。
+2. 启动代理客户端。程序可以启用 GNOME 手动系统代理，但不会启动 Clash/Mihomo，也不会替代理客户端选择端口。
 3. 下载或克隆本项目，进入项目根目录，安装 uv。
 4. Ubuntu 系统依赖可通过下面命令安装（需要管理员权限，仅用于安装依赖）：
 
@@ -74,12 +74,14 @@ uv 会选择满足 Python 3.10+ 要求的解释器。推荐使用 Ubuntu 自带�
 
 ### 推荐操作顺序
 
-1. 保持“跟随 GNOME 系统代理”，此模式只显示步骤，不显示手动输入框。
-2. 点击“检测代理”，确认读取到的地址与客户端一致。端口可连接不等于代理协议或远端服务已验证。
-3. 点击“预览配置”，确认目标快捷方式；此时不会写入启动配置。
-4. 点击“应用配置”，确认后工具备份并写入用户级文件。
-5. 点击“检查状态”，查看每个文件的具体状态。“操作成功”只表示命令执行结束，必须同时阅读输出；“尚未安装”不代表已配置。
-6. 完全退出 ChatGPT/Codex，再通过原图标打开，实际发送消息并验证所需功能。
+1. 保持“跟随 GNOME 系统代理”，先启动 Clash/Mihomo 等代理客户端。
+2. 点击“启用系统代理”。程序读取 GNOME 中保留的 HTTP/HTTPS/SOCKS 地址，检查端口后将模式切换为 Manual；设置会在程序退出和电脑重启后继续保留。
+3. 如果按钮失败，在 Ubuntu“设置 → 网络 → 网络代理”中打开开关、选择 Manual，填写代理客户端的地址和端口，然后继续。
+4. 点击“检测代理”，确认读取到的地址与客户端一致。端口可连接不等于代理协议或远端服务已验证。
+5. 点击“预览配置”，确认目标快捷方式；此时不会写入启动配置。
+6. 点击“应用配置”，确认后工具备份并写入用户级文件。
+7. 点击“检查状态”，查看每个文件的具体状态。“操作成功”只表示命令执行结束，必须同时阅读输出；“尚未安装”不代表已配置。
+8. 完全退出 ChatGPT/Codex，再通过原图标打开，实际发送消息并验证所需功能。
 
 已正常配置后不必每天运行本工具。跟随模式下，只要客户端和 GNOME 代理设置同步更新，下次完整启动就会读取新端口。
 
@@ -98,7 +100,7 @@ uv sync --locked
 uv run python gui.py
 ```
 
-界面提供检测代理、预览配置、应用配置、检查状态、恢复原配置、保存设置。
+界面提供启用系统代理、检测代理、预览配置、应用配置、检查状态、恢复原配置和保存设置。
 操作记录右侧的“清空记录”会清除界面和 JSON 中的全部历史，保留代理设置；操作执行期间按钮禁用。清除后无法通过本工具恢复。
 默认跟随系统代理，也可选择手动固定地址；快捷方式留空则自动检测。
 跟随模式隐藏两个输入框，显示检测、预览、应用及重启的操作步骤，并自动寻找快捷方式。
@@ -131,6 +133,8 @@ uv run python proxy_setup.py install --apply
 `install` 默认只预览，`--apply` 才写入并备份已有快捷方式。完成后手动完全退出应用，再点击原图标。不自动关闭会话，也不修改全局代理。
 
 ```bash
+# 校验 GNOME 中保存的地址并切换为 Manual
+uv run python proxy_setup.py enable-proxy
 # 查看受管理文件是否完整
 uv run python proxy_setup.py status
 # 恢复安装前的快捷方式
@@ -146,6 +150,10 @@ uv run python proxy_setup.py install --proxy http://127.0.0.1:7897
 安装后启动器使用系统 `/usr/bin/python3`，无需启动 uv 或保留项目目录。执行恢复仍需本工具代码。
 
 ## 来源与行为
+
+“启用系统代理”只改变当前用户的 GNOME 代理模式，不启动代理客户端，也不改写地址。按钮会先校验 GNOME 中保留的地址及 TCP 端口，避免在代理服务未运行时打开一个不可用的系统代理。如果已经是 Manual，操作保持幂等。
+
+代理来源优先级：
 
 1. 有 `--proxy` 时使用该固定地址。
 2. 否则每次启动读取 GNOME 手动代理，读取 HTTP、HTTPS、SOCKS 和绕过列表。
@@ -196,7 +204,7 @@ HTTP 与 HTTPS 的系统设置可以不同；GNOME HTTPS 栏表示用于 HTTPS �
 
 ## 限制
 
-- 必须先运行代理客户端并启用 GNOME 手动系统代理；PAC、TUN-only 或关闭状态需手动指定受支持的代理地址。
+- 必须先运行代理客户端；程序可基于 GNOME 中已保存且端口可连接的地址启用 Manual，但不会启动 Clash/Mihomo。地址缺失或按钮失败时需在 Ubuntu 设置中手动配置。
 - 若客户端改端口却未更新 GNOME，工具无法凭空获得新值。
 - 当前已运行进程不受修改影响；终端直接输入 `chatgpt` 也不经过此快捷方式。
 - 不保证所有应用组件支持代理变量，不保证消除云端对话超时。
@@ -219,7 +227,7 @@ git diff --check
 
 # Ubuntu Codex Proxy Launcher
 
-This tool reads the GNOME manual proxy configuration and installs a user-level launcher for ChatGPT/Codex. After installation, opening the original application icon detects the current system proxy at launch time, so users no longer need to run a long `env ... chatgpt` command. If the system proxy port changes, the next complete application restart reads the new port.
+This tool reads the GNOME manual proxy configuration and installs a user-level launcher for ChatGPT/Codex. Its GUI can validate the proxy endpoints already stored by GNOME and switch the system proxy mode to Manual. After installation, opening the original application icon detects the current system proxy at launch time, so users no longer need to run a long `env ... chatgpt` command. If the system proxy port changes, the next complete application restart reads the new port.
 
 ## Why this project exists
 
@@ -275,7 +283,7 @@ PAC, authenticated proxies, TUN-only configurations, Snap/Flatpak entries, and c
 ## Installation and first run
 
 1. Install a ChatGPT/Codex build that runs on the target computer and provides a regular `.desktop` entry.
-2. Start the proxy client, enable the GNOME manual system proxy, and confirm its address and port.
+2. Start the proxy client. The tool can enable GNOME manual proxy mode, but it does not launch Clash/Mihomo or choose the proxy client's port.
 3. Download or clone this repository and install uv.
 4. Install the Ubuntu system dependencies and create the environment:
 
@@ -290,18 +298,20 @@ uv selects an interpreter satisfying Python 3.10 or newer. The Ubuntu system Pyt
 
 ## Recommended GUI workflow
 
-1. Keep **Follow GNOME system proxy** selected. This mode shows instructions instead of manual input fields.
-2. Select **Detect proxy** and confirm that the detected address matches the proxy client. A reachable TCP port does not prove that the proxy protocol or remote service works.
-3. Select **Preview configuration** and confirm the target desktop entry. Preview does not write launcher files.
-4. Select **Apply configuration** and confirm the operation. The tool creates a backup and user-level launcher.
-5. Select **Check status** and read the detailed output. A successful command only means that the check ran; the output may still say that no configuration is installed.
-6. Completely quit ChatGPT/Codex, reopen it from its original application icon, and test the required online functions.
+1. Keep **Follow GNOME system proxy** selected and start Clash/Mihomo or another proxy client.
+2. Select **Enable system proxy**. The tool reads the HTTP/HTTPS/SOCKS endpoints retained by GNOME, checks their ports, and switches the mode to Manual. The setting persists after this tool exits and after a reboot.
+3. If the button fails, open **Ubuntu Settings → Network → Network Proxy**, turn it on, choose Manual, and enter the proxy client's address and port.
+4. Select **Detect proxy** and confirm that the detected address matches the proxy client. A reachable TCP port does not prove that the proxy protocol or remote service works.
+5. Select **Preview configuration** and confirm the target desktop entry. Preview does not write launcher files.
+6. Select **Apply configuration** and confirm the operation. The tool creates a backup and user-level launcher.
+7. Select **Check status** and read the detailed output. A successful command only means that the check ran; the output may still say that no configuration is installed.
+8. Completely quit ChatGPT/Codex, reopen it from its original application icon, and test the required online functions.
 
 After a successful setup, the configuration tool does not need to run every day. In system mode, a complete application restart reads the current GNOME proxy again. The proxy client and GNOME settings must refer to the same active port.
 
 In **Manual fixed address** mode, enter a complete proxy URL such as `http://127.0.0.1:7897`. Leave the desktop-entry field empty for automatic discovery, or select a `.desktop` file. Manual mode stores a fixed address and must be reapplied if the port changes.
 
-The GUI provides proxy detection, preview, apply, status, restore, preference saving, and operation-history clearing. Saving preferences does not apply them to the application launcher. Applying or restoring requires an explicit confirmation.
+The GUI provides system-proxy enabling, proxy detection, preview, apply, status, restore, preference saving, and operation-history clearing. Saving preferences does not apply them to the application launcher. Applying or restoring requires an explicit confirmation.
 
 ### VS Code and other IDEs
 
@@ -312,6 +322,9 @@ Other IDEs can run the root [main.py](main.py) with the project `.venv/bin/pytho
 ### Command-line interface
 
 ```bash
+# Validate retained GNOME endpoints and switch the mode to Manual
+uv run python proxy_setup.py enable-proxy
+
 # Read and check the current proxy without modifying files
 uv run python proxy_setup.py detect --check
 
@@ -339,6 +352,8 @@ When using explicit options, pass them again to the final `install --apply` comm
 The installed launcher uses `/usr/bin/python3`; it does not depend on the project's uv environment or the continued presence of the repository. The project is still required to run the restore command.
 
 ## Detection behavior
+
+**Enable system proxy** changes only the current user's GNOME proxy mode. It does not start a proxy client or rewrite endpoint values. The tool first validates the retained endpoints and their TCP ports, which avoids enabling an unusable system proxy while the proxy service is stopped. Running it while GNOME is already in Manual mode is idempotent.
 
 The source priority is:
 
@@ -384,7 +399,7 @@ This repository does not currently include an open-source license. Publishing it
 
 ## Limitations
 
-- The proxy client must be running. Automatic mode requires an enabled GNOME manual proxy.
+- The proxy client must be running. The tool can enable Manual mode from valid retained GNOME endpoints, but it cannot start Clash/Mihomo. Missing endpoints or a failed button require manual configuration in Ubuntu Settings.
 - If a client changes its port without updating GNOME settings, the tool cannot discover the new value.
 - Existing application processes do not receive new environment variables. Completely quit before retesting.
 - Direct terminal launches do not use the managed desktop launcher.

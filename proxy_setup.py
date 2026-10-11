@@ -39,6 +39,14 @@ def gget(schema, key):
         raise SetupError('无法读取 GNOME 系统代理，请检查桌面会话或使用 --proxy。') from exc
 
 
+def gset(schema, key, value):
+    try:
+        subprocess.run(['gsettings', 'set', schema, key, value], capture_output=True,
+                       text=True, timeout=4, check=True)
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise SetupError('无法修改 GNOME 系统代理，请检查桌面会话和用户权限。') from exc
+
+
 def validate_url(value):
     try:
         parsed = urlsplit(value)
@@ -62,16 +70,8 @@ def endpoint(host, port, scheme):
     return validate_url(f'{scheme}://{host}:{port}')
 
 
-def detect_proxy(explicit=None, read=gget):
-    if explicit:
-        value = validate_url(explicit)
-        return {'source': 'explicit', 'http': value, 'https': value, 'all': value,
-                'bypass': BASE_BYPASS.copy()}
+def read_gnome_proxy(read=gget):
     root = 'org.gnome.system.proxy'
-    mode = read(root, 'mode')
-    if mode != 'manual':
-        raise SetupError('系统代理已关闭。' if mode == 'none' else
-                         '首版不支持 PAC/自动代理；请使用手动代理或 --proxy。')
     if read(root + '.http', 'use-authentication'):
         raise SetupError('首版不支持需要认证的代理。')
     values = {}
@@ -88,6 +88,18 @@ def detect_proxy(explicit=None, read=gget):
         raise SetupError('系统代理绕过列表格式无效。')
     return {'source': 'gnome', 'http': values['http'], 'https': values['https'],
             'all': values['socks'], 'bypass': list(dict.fromkeys(BASE_BYPASS + bypass))}
+
+
+def detect_proxy(explicit=None, read=gget):
+    if explicit:
+        value = validate_url(explicit)
+        return {'source': 'explicit', 'http': value, 'https': value, 'all': value,
+                'bypass': BASE_BYPASS.copy()}
+    mode = read('org.gnome.system.proxy', 'mode')
+    if mode != 'manual':
+        raise SetupError('系统代理已关闭。' if mode == 'none' else
+                         '首版不支持 PAC/自动代理；请使用手动代理或 --proxy。')
+    return read_gnome_proxy(read)
 
 
 def proxy_environment(config, original=None):
@@ -120,6 +132,25 @@ def check_ports(config, attempts=1):
         if attempt + 1 < attempts:
             time.sleep(1)
     raise SetupError('代理端口不可连接，请先启动代理客户端。未切换为直连。')
+
+
+def enable_system_proxy(read=gget, write=gset, checker=check_ports):
+    root = 'org.gnome.system.proxy'
+    old_mode = read(root, 'mode')
+    if old_mode not in ('none', 'manual', 'auto'):
+        raise SetupError('无法识别当前 GNOME 系统代理模式。')
+    config = read_gnome_proxy(read)
+    checker(config)
+    if old_mode == 'manual':
+        return config, False
+    write(root, 'mode', 'manual')
+    if read(root, 'mode') != 'manual':
+        try:
+            write(root, 'mode', old_mode)
+        except SetupError:
+            pass
+        raise SetupError('系统代理切换后验证失败，请在 Ubuntu 设置中手动开启。')
+    return config, True
 
 
 def locations():
@@ -357,6 +388,7 @@ def main(argv=None):
     detect = sub.add_parser('detect', help='只读检测；--check 仅检查 TCP 连通')
     detect.add_argument('--proxy')
     detect.add_argument('--check', action='store_true')
+    sub.add_parser('enable-proxy', help='校验已保存地址并启用 GNOME 手动系统代理')
     install_parser = sub.add_parser('install', help='默认预览；--apply 才写入')
     install_parser.add_argument('--proxy')
     install_parser.add_argument('--desktop')
@@ -367,7 +399,13 @@ def main(argv=None):
     run.add_argument('command', nargs=argparse.REMAINDER)
     args = parser.parse_args(argv)
     try:
-        if args.action == 'detect':
+        if args.action == 'enable-proxy':
+            config, changed = enable_system_proxy()
+            print(json.dumps(config, ensure_ascii=False, indent=2))
+            print('GNOME 系统代理已切换为 Manual，并将持续保持。' if changed else
+                  'GNOME 系统代理已经是 Manual，无需重复修改。')
+            print('提示：代理客户端必须继续运行；本操作不会启动 Clash/Mihomo。')
+        elif args.action == 'detect':
             config = detect_proxy(args.proxy)
             print(json.dumps(config, ensure_ascii=False, indent=2))
             if any(os.environ.get(k) for k in PROXY_KEYS - {'NO_PROXY', 'no_proxy'}):

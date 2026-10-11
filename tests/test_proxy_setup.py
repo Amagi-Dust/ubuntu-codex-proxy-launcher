@@ -28,6 +28,40 @@ def reader(port=7897, mode='manual', socks=False):
 
 
 class ProxyTests(unittest.TestCase):
+    def test_enable_system_proxy(self):
+        state = {'mode': 'none'}
+        base = reader()
+        writes = []
+
+        def read(schema, key):
+            return state['mode'] if key == 'mode' else base(schema, key)
+
+        def write(schema, key, value):
+            writes.append((schema, key, value))
+            state['mode'] = value
+
+        config, changed = app.enable_system_proxy(read, write, lambda value: None)
+        self.assertTrue(changed)
+        self.assertEqual(state['mode'], 'manual')
+        self.assertEqual(config['https'], 'http://127.0.0.1:7897')
+        self.assertEqual(writes, [('org.gnome.system.proxy', 'mode', 'manual')])
+
+        _, changed = app.enable_system_proxy(read, write, lambda value: None)
+        self.assertFalse(changed)
+        self.assertEqual(len(writes), 1)
+
+    def test_enable_checks_port_before_changing_mode(self):
+        state = {'mode': 'none'}
+        base = reader()
+
+        def read(schema, key):
+            return state['mode'] if key == 'mode' else base(schema, key)
+
+        with self.assertRaises(app.SetupError):
+            app.enable_system_proxy(read, lambda *args: state.update(mode='manual'),
+                                    lambda value: (_ for _ in ()).throw(app.SetupError('closed')))
+        self.assertEqual(state['mode'], 'none')
+
     def test_dynamic_port(self):
         self.assertNotEqual(app.detect_proxy(read=reader(7897)), app.detect_proxy(read=reader(8888)))
 

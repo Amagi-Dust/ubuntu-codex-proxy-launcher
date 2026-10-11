@@ -62,6 +62,7 @@ class ConfigTests(unittest.TestCase):
         args = gui.command_for('预览配置', data)
         self.assertNotIn('--proxy', args)
         self.assertNotIn('--desktop', args)
+        self.assertIn('enable-proxy', gui.command_for('启用系统代理', data))
 
 
 if __name__ == '__main__':
