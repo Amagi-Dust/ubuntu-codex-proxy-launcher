@@ -6,7 +6,7 @@
 
 自动读取 Ubuntu 上 Clash/Mihomo 等客户端对应的代理信息，为 ChatGPT/Codex 生成持久的用户级启动配置。
 
-第一版已实现，使用 uv 管理 Python 3.12 环境，无第三方 Python 依赖，并使用本地 Git 管理版本。用户已反馈在本机应用配置并从图标启动正常，系统代理端口变更后仍可使用。尚未完成充分的多设备测试，Ubuntu 22.04 仅为兼容候选。
+第一版已实现，使用 uv 管理 Python 3.12 环境，无第三方 Python 依赖，并使用本地 Git 管理版本。用户已反馈在 Ubuntu 24.04.5 设备应用配置并从图标启动正常，系统代理端口变更后仍可使用；另有两台 Ubuntu 22.04 设备测试成功。尚未完成充分的多设备、多安装方式测试。
 
 已有人工案例：启动环境变量指向 `http://127.0.0.1:7897` 后，用户确认能够登录并使用 Codex；用户级 `chatgpt.desktop` 可保存同样设置。案例不代表所有 Ubuntu 版本、客户端或应用组件均已验证。云端对话曾间歇性超时，根因未确认。
 
@@ -18,7 +18,7 @@
 - 默认每次启动重新读取 GNOME 手动代理；显式 `--proxy` 为固定地址模式。
 - UI/CLI 可在校验 GNOME 已保存地址和端口后将代理模式切换为 Manual；不启动代理客户端、不静默改写地址。
 
-本机验证 Ubuntu 24.04.5、Python 3.12.3、uv 0.12.3。支持普通原生应用 desktop 入口。依赖 gsettings 和 desktop-file-validate，notify-send 可选。详细操作见 README.md：`detect` 检测、`install` 预览、`install --apply` 应用、`status` 检查、`restore` 恢复。
+已验证 Ubuntu 24.04.5（Python 3.12.3、uv 0.12.3）和两台 Ubuntu 22.04 设备；22.04 设备的具体桌面环境、Python 版本和安装方式未单独记录。支持普通原生应用 desktop 入口。依赖 gsettings 和 desktop-file-validate，notify-send 可选。详细操作见 README.md：`detect` 检测、`install` 预览、`install --apply` 应用、`status` 检查、`restore` 恢复。
 
 优先级为显式地址 > GNOME 手动代理；环境变量只提示存在，不作为回退。动态检测、端口检查、环境变量设置后执行原应用。默认写入用户数据目录中的 applications 与 codex-proxy-setup，安装后通过系统 Python 启动，无需保留 uv 环境。
 
@@ -51,4 +51,4 @@ UI 顶部醒目标注配置前必须启动 Clash/Mihomo 等客户端并开启其
 
 用户配置与历史保存在用户配置目录，实际启动器与备份保存在用户数据目录，并非全部保存在项目内。GitHub 仅分享源码、文档、示例和环境声明；README 提供新用户操作流程、支持矩阵与完整路径说明。
 
-后续优先完成 Ubuntu 22.04/更多设备验证和更多安装方式兼容。不需要机器人环境、Windows 提交脚本或 NTFS 镜像。
+后续优先补充 Ubuntu 22.04 测试环境详细记录，并完成更多设备和安装方式的兼容性验证。不需要机器人环境、Windows 提交脚本或 NTFS 镜像。

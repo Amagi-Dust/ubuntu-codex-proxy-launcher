@@ -1,4 +1,4 @@
-> **测试提示：本程序尚未经过充分的多设备、多系统版本测试，目前仍为早期版本。仅在一台 Ubuntu 24.04.5 GNOME 设备上获得实际使用反馈，不能保证适用于所有 Ubuntu 版本、硬件、代理客户端或 Codex 安装方式。请先检测和预览，再应用配置。**
+> **测试提示：本程序尚未经过充分的多设备、多系统版本测试，目前仍为早期版本。已在一台 Ubuntu 24.04.5 GNOME 设备和两台 Ubuntu 22.04 设备上测试成功，但不能保证适用于所有 Ubuntu 版本、硬件、代理客户端或 Codex 安装方式。请先检测和预览，再应用配置。**
 
 # Ubuntu Codex 代理启动配置（Ubuntu Codex Proxy Launcher）
 
@@ -53,7 +53,7 @@ uv run python proxy_setup.py --help
 
 不改写系统安装文件或全局代理，不需要 root 来应用配置。启动器不会主动关闭已有应用，因此配置或端口改变后，应完全退出再从图标启动。命令行直接输入 `chatgpt` 不会经过这个桌面入口。
 
-用户已反馈：应用配置后从图标启动正常；端口由 7897 改为 7890 后仍可正常使用。这是单设备功能反馈，不是跨设备认证或对具体网络路径的抓包验证。
+用户已反馈：Ubuntu 24.04.5 设备应用配置后从图标启动正常，端口由 7897 改为 7890 后仍可正常使用；另外两台 Ubuntu 22.04 设备也已测试成功。这些是有限设备的功能反馈，不是对所有环境的兼容性认证或对具体网络路径的抓包验证。
 
 ## 适用设备与支持范围
 
@@ -62,7 +62,7 @@ uv run python proxy_setup.py --help
 | 环境 | 当前范围 |
 | --- | --- |
 | Ubuntu 24.04.5 + GNOME | 已有单设备使用反馈及本机测试 |
-| Ubuntu 22.04 + GNOME | 兼容候选，尚未在真实设备和 Python 3.10 上完成验证 |
+| Ubuntu 22.04 | 已在两台真实设备上测试成功；具体桌面环境、Python 版本和安装方式未单独记录 |
 | 其他 Ubuntu 版本或 GNOME Linux 发行版 | 未验证，不作支持承诺 |
 | KDE、XFCE 等非 GNOME 桌面 | 自动跟随模式不支持；显式地址模式仍需单独验证 |
 | Windows、macOS | 当前不支持 |
@@ -248,7 +248,7 @@ git diff --check
 
 ---
 
-> **Testing notice: This is an early release and has not yet been tested across enough devices or operating-system versions. It has received real-world feedback from only one Ubuntu 24.04.5 GNOME device. Compatibility with every Ubuntu version, computer, proxy client, or Codex installation method is not guaranteed. Always run detection and preview before applying changes.**
+> **Testing notice: This is an early release and has not yet been tested across enough devices or operating-system versions. Testing has succeeded on one Ubuntu 24.04.5 GNOME device and two Ubuntu 22.04 devices. Compatibility with every Ubuntu version, computer, proxy client, or Codex installation method is not guaranteed. Always run detection and preview before applying changes.**
 
 # Ubuntu Codex Proxy Launcher
 
@@ -301,7 +301,7 @@ Open the original application icon
 
 The tool does not modify `/usr/bin`, `/usr/lib`, or the global system proxy, and applying a configuration does not require root access. It does not terminate an existing Codex session. After applying a new configuration or changing a port, completely quit the application and reopen it from the icon. Running `chatgpt` directly in a terminal bypasses this desktop launcher.
 
-On the currently tested device, launching from the icon worked after installation. It also continued to work after the GNOME proxy port changed from 7897 to 7890. This is single-device feedback, not cross-device certification or packet-level verification.
+On the Ubuntu 24.04.5 device, launching from the icon worked after installation and continued to work after the GNOME proxy port changed from 7897 to 7890. Testing also succeeded on two Ubuntu 22.04 devices. These results are limited real-device feedback, not certification of every environment or packet-level verification.
 
 ## Supported environments
 
@@ -310,7 +310,7 @@ Compatibility depends mainly on the operating system, desktop environment, and a
 | Environment | Current status |
 | --- | --- |
 | Ubuntu 24.04.5 with GNOME | Tested on one device with successful user feedback |
-| Ubuntu 22.04 with GNOME | Compatibility candidate; no real-device or Python 3.10 validation yet |
+| Ubuntu 22.04 | Successfully tested on two real devices; their exact desktop environment, Python version, and installation method were not recorded separately |
 | Other Ubuntu versions or GNOME Linux distributions | Not validated; no compatibility promise |
 | KDE, XFCE, and other non-GNOME desktops | Automatic system mode is unsupported; manual mode still needs validation |
 | Windows and macOS | Unsupported |
