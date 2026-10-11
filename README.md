@@ -4,6 +4,30 @@
 
 从 GNOME 手动系统代理读取地址，为 ChatGPT/Codex 安装用户级桌面启动器。界面可以校验 GNOME 中已保存的地址并将系统代理切换为 Manual。之后点击原图标时重新检测代理，不再每次输入 `env ... chatgpt`。系统代理更新端口后，下次启动自动读取新端口。
 
+## 快速启动
+
+> **运行本工具前，先启动 Clash、Mihomo 等代理客户端，并开启客户端的“系统代理”功能。** 如果客户端无法自动打开 Ubuntu Network Proxy，可在本工具中点击“启用系统代理”，或按界面说明手动设置。
+
+首次下载项目后先在项目目录执行一次：
+
+```bash
+uv sync --locked
+```
+
+方式一：在 VS Code 或其他 IDE 中打开项目，运行根目录的 `main.py`。VS Code 可以点击“运行 Python 文件”，或按 F5/Ctrl+F5 选择“启动 Codex 代理配置界面”。解释器选择 `.venv/bin/python`。
+
+方式二：在项目目录使用命令行运行：
+
+```bash
+uv run python main.py
+```
+
+如果只使用命令行功能而不打开 UI，可以运行：
+
+```bash
+uv run python proxy_setup.py --help
+```
+
 ## 为什么编写这个项目
 
 本项目源自一次 Ubuntu 上 ChatGPT/Codex 启动与联网问题：代理客户端已经运行，但应用仍无法正常使用；通过命令行显式设置 HTTP_PROXY、HTTPS_PROXY 等代理环境变量后，用户确认能够启动、登录并使用 Codex。
@@ -228,6 +252,30 @@ git diff --check
 # Ubuntu Codex Proxy Launcher
 
 This tool reads the GNOME manual proxy configuration and installs a user-level launcher for ChatGPT/Codex. Its GUI can validate the proxy endpoints already stored by GNOME and switch the system proxy mode to Manual. After installation, opening the original application icon detects the current system proxy at launch time, so users no longer need to run a long `env ... chatgpt` command. If the system proxy port changes, the next complete application restart reads the new port.
+
+## Quick start
+
+> **Before running this tool, start Clash, Mihomo, or another proxy client and enable its System Proxy function.** If the client cannot enable Ubuntu Network Proxy automatically, select **Enable system proxy** in this tool or follow the manual instructions shown in the GUI.
+
+After downloading the project, run this once from the repository directory:
+
+```bash
+uv sync --locked
+```
+
+Option 1: Open the project in VS Code or another IDE and run the root `main.py`. In VS Code, use **Run Python File**, or press F5/Ctrl+F5 and select **启动 Codex 代理配置界面**. Select `.venv/bin/python` as the interpreter.
+
+Option 2: Start the GUI from a terminal in the repository directory:
+
+```bash
+uv run python main.py
+```
+
+For CLI-only operation without opening the GUI:
+
+```bash
+uv run python proxy_setup.py --help
+```
 
 ## Why this project exists
 

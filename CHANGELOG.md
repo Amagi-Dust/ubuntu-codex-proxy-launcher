@@ -1,5 +1,13 @@
 # 更新日志
 
+## 2026-10-11（JST）— 前置条件提示与快速启动
+
+- UI 顶部醒目标注配置前必须启动 Clash/Mihomo 等代理客户端并开启其系统代理功能。
+- README 中文和英文说明开头新增快速启动，重复提供 IDE 运行 main.py、终端运行 main.py 和 CLI 帮助入口。
+- 主要文件：gui.py、README.md、PROJECT_OVERVIEW.md、CHANGELOG.md。
+- 验证：GUI 提示内容及布局、README 中英文启动命令、完整测试和 Python 编译检查。
+- 自动版本提交：已完成。
+
 ## 2026-10-11（JST）— GNOME 系统代理启用操作
 
 - 新增 UI/CLI“启用系统代理”：读取 GNOME 中保留的手动地址，先校验端口，再切换当前用户代理模式为 Manual；重复操作幂等。

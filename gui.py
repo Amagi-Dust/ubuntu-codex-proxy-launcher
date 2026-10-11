@@ -123,6 +123,13 @@ class App:
         frame = ttk.Frame(root, padding=20)
         frame.pack(fill='both', expand=True)
         ttk.Label(frame, text='Codex 代理配置', font=('', 20, 'bold')).pack(anchor='w')
+        style = ttk.Style(root)
+        style.configure('Prerequisite.TLabel', font=('', 11, 'bold'), foreground='#b00020')
+        self.prerequisite_notice = ttk.Label(
+            frame,
+            text='⚠ 配置前必须先启动 Clash/Mihomo 等代理客户端，并开启客户端的“系统代理”功能；否则检测或启动可能失败。',
+            style='Prerequisite.TLabel', justify='left', wraplength=820)
+        self.prerequisite_notice.pack(anchor='w', fill='x', pady=(8, 4))
         ttk.Label(frame, text='启用系统代理 → 检测 → 预览 → 应用。应用后完全退出 Codex，再从原图标启动。').pack(anchor='w', pady=(5, 16))
         self.mode = tk.StringVar(value=self.data['mode'])
         self.proxy = tk.StringVar(value=self.data['proxy_url'])
