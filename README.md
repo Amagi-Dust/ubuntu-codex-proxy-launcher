@@ -98,9 +98,9 @@ uv 会选择满足 Python 3.10+ 要求的解释器。推荐使用 Ubuntu 自带�
 
 ### 推荐操作顺序
 
-1. 保持“跟随 GNOME 系统代理”，先启动 Clash/Mihomo 等代理客户端。
+1. 保持“跟随 GNOME 系统代理”，先启动 Clash/Mihomo 等代理客户端，并开启客户端的“系统代理”功能。
 2. 点击“启用系统代理”。程序读取 GNOME 中保留的 HTTP/HTTPS/SOCKS 地址，检查端口后将模式切换为 Manual；设置会在程序退出和电脑重启后继续保留。
-3. 如果按钮失败，在 Ubuntu“设置 → 网络 → 网络代理”中打开开关、选择 Manual，填写代理客户端的地址和端口，然后继续。
+3. 如果按钮失败，在 Ubuntu“设置 → 网络 → 网络代理”中打开开关并选择 Manual。如果地址和端口已由代理客户端写入，无需重新填写；仅在字段为空或与客户端不一致时手动填写。
 4. 点击“检测代理”，确认读取到的地址与客户端一致。端口可连接不等于代理协议或远端服务已验证。
 5. 点击“预览配置”，确认目标快捷方式；此时不会写入启动配置。
 6. 点击“应用配置”，确认后工具备份并写入用户级文件。
@@ -228,7 +228,8 @@ HTTP 与 HTTPS 的系统设置可以不同；GNOME HTTPS 栏表示用于 HTTPS �
 
 ## 限制
 
-- 必须先运行代理客户端；程序可基于 GNOME 中已保存且端口可连接的地址启用 Manual，但不会启动 Clash/Mihomo。地址缺失或按钮失败时需在 Ubuntu 设置中手动配置。
+- 必须先运行代理客户端并开启其“系统代理”功能；部分 Clash 内核客户端会写入代理地址和端口，却不会将 GNOME 模式切换为 Manual。本工具可校验已保存的端点并完成该切换，但不会启动 Clash/Mihomo。
+- 按钮失败时可在 Ubuntu 设置中手动切换为 Manual；只有在代理地址或端口缺失、错误时才需手动填写。
 - 若客户端改端口却未更新 GNOME，工具无法凭空获得新值。
 - 当前已运行进程不受修改影响；终端直接输入 `chatgpt` 也不经过此快捷方式。
 - 不保证所有应用组件支持代理变量，不保证消除云端对话超时。
@@ -346,9 +347,9 @@ uv selects an interpreter satisfying Python 3.10 or newer. The Ubuntu system Pyt
 
 ## Recommended GUI workflow
 
-1. Keep **Follow GNOME system proxy** selected and start Clash/Mihomo or another proxy client.
+1. Keep **Follow GNOME system proxy** selected, start Clash/Mihomo or another proxy client, and enable the client's **System Proxy** function.
 2. Select **Enable system proxy**. The tool reads the HTTP/HTTPS/SOCKS endpoints retained by GNOME, checks their ports, and switches the mode to Manual. The setting persists after this tool exits and after a reboot.
-3. If the button fails, open **Ubuntu Settings → Network → Network Proxy**, turn it on, choose Manual, and enter the proxy client's address and port.
+3. If the button fails, open **Ubuntu Settings → Network → Network Proxy**, turn it on, and choose Manual. Keep endpoints already written by the proxy client; enter them manually only when the fields are empty or do not match the client.
 4. Select **Detect proxy** and confirm that the detected address matches the proxy client. A reachable TCP port does not prove that the proxy protocol or remote service works.
 5. Select **Preview configuration** and confirm the target desktop entry. Preview does not write launcher files.
 6. Select **Apply configuration** and confirm the operation. The tool creates a backup and user-level launcher.

@@ -1,5 +1,13 @@
 # 更新日志
 
+## 2026-10-11（JST）— 明确 Manual 模式切换与端点填写
+
+- 根据实机测试明确：部分 Clash 内核客户端开启“系统代理”后会保留代理端点，但不会自动将 GNOME Network Proxy 切换为 Manual。
+- 修正 UI 和中英文 README 的失败回退说明：按钮失败时先手动切换 Manual，已写入的地址和端口无需重填，仅空值或错误时手动填写。
+- 主要文件：gui.py、README.md、PROJECT_OVERVIEW.md、CHANGELOG.md。
+- 验证：UI 文案检查、完整自动化测试、Python 编译检查、uv 锁文件离线检查及差异格式检查。
+- 自动版本提交：已完成。
+
 ## 2026-10-11（JST）— 前置条件提示与快速启动
 
 - UI 顶部醒目标注配置前必须启动 Clash/Mihomo 等代理客户端并开启其系统代理功能。

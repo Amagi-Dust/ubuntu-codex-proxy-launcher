@@ -142,12 +142,12 @@ class App:
             radio.grid(row=0, column=column, sticky='w', pady=5)
             self.widgets.append(radio)
         self.system_steps = ttk.Label(form, text=(
-            '1. 先启动 Clash/Mihomo，再点击“启用系统代理”。\n'
+            '1. 先启动 Clash/Mihomo 并开启客户端的“系统代理”，再点击“启用系统代理”。\n'
             '2. 点击“检测代理”，再点击“预览配置”，在下方查看结果。\n'
             '3. 点击“应用配置”，然后“检查状态”。\n'
             '4. 完全退出 Codex，再从原图标启动。\n'
-            '按钮开启失败时：Ubuntu 设置 → 网络 → 网络代理 → 打开开关 → 选择 Manual，\n'
-            '填写代理客户端的 HTTP/HTTPS 地址和端口，然后从第 2 步继续。'),
+            '按钮开启失败时：Ubuntu 设置 → 网络 → 网络代理 → 打开开关 → 选择 Manual。\n'
+            '若地址和端口已由代理客户端写入，直接从第 2 步继续；仅在字段为空或错误时手动填写。'),
             justify='left', wraplength=690)
         self.system_steps.grid(row=1, column=0, columnspan=3, sticky='ew', pady=8)
         self.manual_fields = ttk.Frame(form)
